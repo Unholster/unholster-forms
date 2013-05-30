@@ -3,11 +3,12 @@ import json
 from bson import json_util
 from settings import MANDRILL_APIKEY, MANDRILL_ENDPOINT
 
-def send_with_template(form, contents):
+def send_with_template(form, contents, attachments):
     form_fields = ["to"] #['subject', 'from_email', 'from_name', 'to']
     message = { k:form.get(k, None) for k in form_fields }
     message.update(
-            {'global_merge_vars': [{ 'name':"f_"+key, 'content':value[0]} for key, value in contents.iteritems() if value[0]]}
+            {'global_merge_vars': [{ 'name':"f_"+key, 'content':value[0]} for key, value in contents.iteritems()],
+            'attachments': attachments}
         )
     data = {
             'key': MANDRILL_APIKEY,

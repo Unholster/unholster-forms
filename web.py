@@ -4,6 +4,7 @@ from flask import Flask, request, redirect, abort
 from util import jsonify
 import accounts, forms, mandrill
 import urlparse
+import base64
 
 app = Flask(__name__)
 
@@ -14,13 +15,23 @@ def hello():
 
 @app.route('/submit', methods=["GET", "POST"])
 def submit():
+    #import pdb; pdb.set_trace()
     data = dict(request.form)
     try:
         referer = request.referrer
         form_name = data.pop("forms:form")[0]
         account_name = data.pop("forms:account")[0]
+        redirect_path = data.pop("forms:redirect")[0]
     except KeyError:
         abort(403)
+
+    attachments = []
+    for filename, f in request.files.iteritems():
+        attachments.append({
+                "type": f.content_type,
+                "name": f.filename,
+                "content": base64.b64encode(f.read()),
+            })
 
     account = accounts.find_one({"name": account_name})
 
@@ -37,11 +48,11 @@ def submit():
         print "Referer not allowed %s" % referer
         abort(404)
 
-    result = mandrill.send_with_template(form, data)
+    result = mandrill.send_with_template(form, data, attachments)
     print result
     account.submits().insert({'form': form['_id'], 'data': data, 'mandrill_result':result})
 
-    redirect_url = urlparse.urljoin(referer, "/")
+    redirect_url = urlparse.urljoin(referer, redirect_path)
     return redirect(redirect_url)
 
 
