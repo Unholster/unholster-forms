@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-import urlparse
-
+# import accounts
 from flask import Flask, request, redirect, abort
-
-import accounts
 import ses
-import settings
-from util import jsonify
-
+import urlparse
+# from util import jsonify
+import base64
 
 app = Flask(__name__)
 
@@ -19,52 +16,69 @@ def hello():
 
 @app.route('/submit', methods=["GET", "POST"])
 def submit():
-    '''
-    import pdb; pdb.set_trace()
-    '''
     data = dict(request.form)
     try:
         referer = request.referrer
-        form_name = data.pop("forms:form")[0]
-        account_name = data.pop("forms:account")[0]
-        redirect_path = data.pop("forms:redirect")[0]
+        # form_name = data.pop("forms:form")[0]
+        # account_name = data.pop("forms:account")[0]
+        # redirect_path = data.pop("forms:redirect")[0]
     except KeyError:
         abort(403)
 
     attachments = []
     for filename, f in request.files.iteritems():
-        attachments.append(f.filename)
+        attachments.append({
+            "type": f.content_type,
+            "name": f.filename,
+            "content": base64.b64encode(f.read()),
+        })
 
-    account = accounts.find_one({"name": account_name})
+    # account = accounts.find_one({"name": account_name})
 
-    if account is None:
-        print "Account not found"
-        abort(404)
+    # if account is None:
+    #     print("Account not found")
+    #     abort(404)
 
-    form = account.form(form_name)
-    if form is None:
-        print "Form not found %s" % form_name
-        abort(404)
+    # form = account.form(form_name)
+    # if form is None:
+    #     print("Form not found %s" % form_name)
+    #     abort(404)
 
-    if not form.referer_allowed(referer):
-        print "Referer not allowed %s" % referer
-        abort(404)
+    # if not form.referer_allowed(referer):
+    #     print("Referer not allowed %s" % referer)
+    #     abort(404)
 
-    result = ses.send_email(form, settings.DEFAULT_CONTENT, attachments)
-    print result
-    account.submits().insert({'form': form['_id'], 'data': data, 'ses_result': result})
+    form = UnholsterForm(data)
+    # result = ses.send_with_template(form, data, attachments)
+    ses.send(form.recipients, form.subject, form.content, attachments)
+    # print(result)
+    # account.submits().insert({'form': form['_id'], 'data': data, 'mandrill_result': esult})
 
-    redirect_url = urlparse.urljoin(referer, redirect_path)
-    return redirect(redirect_url)
+    if form.redirect_url:
+        redirect_url = urlparse.urljoin(referer, form.redirect_url)
+        return redirect(redirect_url)
 
 
-@app.route('/account/<account_name>')
-def account(account_name):
-    account = accounts.find_one({"name": account_name})
-    return jsonify(
-            account=account, 
-            submits=list(account.submits().find())
-        )
+# @app.route('/account/<account_name>')
+# def account(account_name):
+#     account = accounts.find_one({"name": account_name})
+#     return jsonify(
+#         account=account,
+#         submits=list(account.submits().find())
+#     )
+
+
+class UnholsterForm:
+    def __init__(self, data):
+        self.recipients = ['contacto@unholster.com']
+        self.subject = 'Contacto vía sitio web'
+        self.content = self._content(data)
+        self.redirect_url = None
+
+    def _content(self, data):
+        tmpl = """
+        """
+        return tmpl.format(**data)
 
 
 if __name__ == "__main__":

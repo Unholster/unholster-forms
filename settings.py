@@ -1,16 +1,9 @@
 import os
 
-MONGODB_URI = os.getenv('MONGOHQ_URL', 'mongodb://localhost')
-
-MANDRILL_APIKEY = os.getenv('MANDRILL_APIKEY', None)
-MANDRILL_ENDPOINT = "https://mandrillapp.com/api/1.0/"
-
-AWS_USER = os.getenv('AWS_USER', '') 
-AWS_PASSWORD = os.getenv('AWS_PASSWORD', '')
-SMTP_SERVER = 'email-smtp.us-west-2.amazonaws.com'
-SMTP_PORT = '587'
-FROM_EMAIL = ''
-DEFAULT_TIMEOUT = 10
-ATTACH_FILE = 'unholster.jpg'
-
-DEFAULT_CONTENT = '<html><body>This is a text body. <strong>Foo bar.</strong></body></html>'
+# MONGODB_URI = os.getenv('MONGOHQ_URL', 'mongodb://localhost')
+SMTP_SERVER = os.getenv('SMTP_SERVER')
+SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
+FROM_EMAIL = os.getenv('FROM_EMAIL', 'no-reply@unholster.com')
+SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT', 10))
+AWS_USER = os.getenv('AWS_USER')
+AWS_PASSWORD = os.getenv('AWS_PASSWORD')

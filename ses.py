@@ -1,35 +1,40 @@
-# -*- coding: utf-8 -*
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
-from email.Utils import formatdate
+from email.Utils import COMMASPACE, formatdate
 from email.mime.application import MIMEApplication
 from os.path import basename
+import settings
 import smtplib
 
-import settings
+AWS_USER = settings.AWS_USER
+AWS_PASSWORD = settings.AWS_PASSWORD
+SMTP_SERVER = settings.SMTP_SERVER
+SMTP_PORT = settings.SMTP_PORT
+FROM_EMAIL = settings.FROM_EMAIL
+SMTP_TIMEOUT = settings.SMTP_TIMEOUT
 
 
-def send_email(form, contents, attachments=[]):
+def send(recipients, subject, email_content, files=[]):
     msg = MIMEMultipart()
-    msg['From'] = settings.FROM_EMAIL
-    msg['Subject'] = form.get('subject', '')
+    msg['From'] = FROM_EMAIL
+    msg['To'] = COMMASPACE.join(recipients)
     msg['Date'] = formatdate(localtime=True)
-    msg.attach(MIMEText(contents))
-    for f in attachments:
+    msg['Subject'] = subject
+    msg.attach(MIMEText(email_content))
+    for f in files:
         with open(f, 'rb') as arch:
             part = MIMEApplication(arch.read(), Name=basename(f))
         part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
         msg.attach(part)
     smtp = smtplib.SMTP(
-        host=settings.SMTP_SERVER,
-        port=settings.SMTP_PORT,
-        timeout=settings.DEFAULT_TIMEOUT)
-    smtp.set_debuglevel(settings.DEFAULT_TIMEOUT)
+        host=SMTP_SERVER,
+        port=SMTP_PORT,
+        timeout=SMTP_TIMEOUT)
+    smtp.set_debuglevel(SMTP_TIMEOUT)
     smtp.starttls()
     smtp.ehlo()
-    smtp.login(settings.AWS_USER, settings.AWS_PASSWORD)
+    smtp.login(AWS_USER, AWS_PASSWORD)
     msg = msg.as_string()
     msg = msg.replace('text/plain', 'text/html')
-    response = smtp.sendmail(settings.FROM_EMAIL, form.get('to', []), msg)
+    smtp.sendmail(FROM_EMAIL, recipients, msg)
     smtp.close()
-    return response
