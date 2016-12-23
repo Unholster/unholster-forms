@@ -57,6 +57,8 @@ def submit():
     if form.redirect_url:
         redirect_url = urlparse.urljoin(referer, form.redirect_url)
         return redirect(redirect_url)
+    else:
+        return 'Sent'
 
 
 # @app.route('/account/<account_name>')
@@ -71,13 +73,16 @@ def submit():
 class UnholsterForm:
     def __init__(self, data):
         self.recipients = ['contacto@unholster.com']
-        self.subject = 'Contacto vía sitio web'
+        self.subject = 'Contacto: {subject[0]}'.format(**data)
         self.content = self._content(data)
         self.redirect_url = None
 
     def _content(self, data):
-        tmpl = """
-        """
+        tmpl = (
+            u"Nombre: {name[0]} <br/>"
+            u"E-mail: <a href=mailto:{email[0]}>{email[0]}</a> </br>"
+            u"<pre>{message[0]}</pre>"
+        )
         return tmpl.format(**data)
 
 

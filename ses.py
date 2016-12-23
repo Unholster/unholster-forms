@@ -20,7 +20,7 @@ def send(recipients, subject, email_content, files=[]):
     msg['To'] = COMMASPACE.join(recipients)
     msg['Date'] = formatdate(localtime=True)
     msg['Subject'] = subject
-    msg.attach(MIMEText(email_content))
+    msg.attach(MIMEText(email_content, _charset='utf-8'))
     for f in files:
         with open(f, 'rb') as arch:
             part = MIMEApplication(arch.read(), Name=basename(f))
