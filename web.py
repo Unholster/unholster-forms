@@ -1,12 +1,16 @@
-import os
-import json
-from flask import Flask, request, redirect, abort
-from util import jsonify
-import accounts, forms, mandrill
+# -*- coding: utf-8 -*-
 import urlparse
-import base64
+
+from flask import Flask, request, redirect, abort
+
+import accounts
+import ses
+import settings
+from util import jsonify
+
 
 app = Flask(__name__)
+
 
 @app.route('/')
 def hello():
@@ -15,7 +19,9 @@ def hello():
 
 @app.route('/submit', methods=["GET", "POST"])
 def submit():
-    #import pdb; pdb.set_trace()
+    '''
+    import pdb; pdb.set_trace()
+    '''
     data = dict(request.form)
     try:
         referer = request.referrer
@@ -27,11 +33,7 @@ def submit():
 
     attachments = []
     for filename, f in request.files.iteritems():
-        attachments.append({
-                "type": f.content_type,
-                "name": f.filename,
-                "content": base64.b64encode(f.read()),
-            })
+        attachments.append(f.filename)
 
     account = accounts.find_one({"name": account_name})
 
@@ -43,14 +45,14 @@ def submit():
     if form is None:
         print "Form not found %s" % form_name
         abort(404)
-    
+
     if not form.referer_allowed(referer):
         print "Referer not allowed %s" % referer
         abort(404)
 
-    result = mandrill.send_with_template(form, data, attachments)
+    result = ses.send_email(form, settings.DEFAULT_CONTENT, attachments)
     print result
-    account.submits().insert({'form': form['_id'], 'data': data, 'mandrill_result':result})
+    account.submits().insert({'form': form['_id'], 'data': data, 'ses_result': result})
 
     redirect_url = urlparse.urljoin(referer, redirect_path)
     return redirect(redirect_url)
