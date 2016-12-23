@@ -6,8 +6,8 @@ from os.path import basename
 import settings
 import smtplib
 
-AWS_USER = settings.AWS_USER
-AWS_PASSWORD = settings.AWS_PASSWORD
+SMTP_USER = settings.SMTP_USER
+SMTP_PASSWORD = settings.SMTP_PASSWORD
 SMTP_SERVER = settings.SMTP_SERVER
 SMTP_PORT = settings.SMTP_PORT
 FROM_EMAIL = settings.FROM_EMAIL
@@ -33,7 +33,7 @@ def send(recipients, subject, email_content, files=[]):
     smtp.set_debuglevel(SMTP_TIMEOUT)
     smtp.starttls()
     smtp.ehlo()
-    smtp.login(AWS_USER, AWS_PASSWORD)
+    smtp.login(SMTP_USER, SMTP_PASSWORD)
     msg = msg.as_string()
     msg = msg.replace('text/plain', 'text/html')
     smtp.sendmail(FROM_EMAIL, recipients, msg)
