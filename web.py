@@ -75,7 +75,7 @@ class UnholsterForm:
         self.recipients = ['contacto@unholster.com']
         self.subject = 'Contacto: {subject[0]}'.format(**data)
         self.content = self._content(data)
-        self.redirect_url = None
+        self.redirect_url = data.get('redirect_url')
 
     def _content(self, data):
         tmpl = (
