@@ -2,7 +2,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE, formatdate
 from email.mime.application import MIMEApplication
-from os.path import basename
+
 import settings
 import smtplib
 
@@ -21,11 +21,13 @@ def send(recipients, subject, email_content, files=[]):
     msg['Date'] = formatdate(localtime=True)
     msg['Subject'] = subject
     msg.attach(MIMEText(email_content, _charset='utf-8'))
-    for f in files:
-        with open(f, 'rb') as arch:
-            part = MIMEApplication(arch.read(), Name=basename(f))
-        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
-        msg.attach(part)
+
+    for file in files:
+        part = MIMEApplication(file.read(), Name=file.filename.encode('utf-8'))
+        part['Content-Disposition'] = 'attachment; filename="{}"'.format(
+            file.filename.encode('utf-8'),
+        )
+
     smtp = smtplib.SMTP(
         host=SMTP_SERVER,
         port=SMTP_PORT,

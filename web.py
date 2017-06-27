@@ -4,7 +4,6 @@ from flask import Flask, request, redirect, abort
 import ses
 import urlparse
 # from util import jsonify
-import base64
 
 app = Flask(__name__)
 
@@ -25,13 +24,7 @@ def submit():
     except KeyError:
         abort(403)
 
-    attachments = []
-    for filename, f in request.files.iteritems():
-        attachments.append({
-            "type": f.content_type,
-            "name": f.filename,
-            "content": base64.b64encode(f.read()),
-        })
+    attachments = [file for name, file in request.files.iteritems()]
 
     # account = accounts.find_one({"name": account_name})
 
@@ -75,7 +68,7 @@ class UnholsterForm:
         self.recipients = ['contacto@unholster.com']
         self.subject = 'Contacto: {subject[0]}'.format(**data)
         self.content = self._content(data)
-        self.redirect_url = None
+        self.redirect_url = data.get('redirect_url')
 
     def _content(self, data):
         tmpl = (
