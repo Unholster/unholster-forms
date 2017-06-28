@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # import accounts
+from raven.contrib.flask import Sentry
 from flask import Flask, request, redirect, abort
 import ses
 import urlparse
 # from util import jsonify
 
 app = Flask(__name__)
+sentry = Sentry()
 
 
 @app.route('/')
@@ -80,4 +82,5 @@ class UnholsterForm:
 
 
 if __name__ == "__main__":
+    sentry.init_app(app)
     app.run(port=8000, debug=True)

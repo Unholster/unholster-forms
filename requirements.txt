@@ -6,3 +6,4 @@ gunicorn==0.17.4
 pymongo==2.5.1
 requests==1.2.2
 wsgiref==0.1.2
+raven[flask]==6.1.0
