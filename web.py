@@ -8,6 +8,7 @@ import urlparse
 
 app = Flask(__name__)
 sentry = Sentry()
+sentry.init_app(app)
 
 
 @app.route('/')
@@ -82,5 +83,4 @@ class UnholsterForm:
 
 
 if __name__ == "__main__":
-    sentry.init_app(app)
     app.run(port=8000, debug=True)
