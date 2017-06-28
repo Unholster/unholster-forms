@@ -51,7 +51,7 @@ def submit():
     # account.submits().insert({'form': form['_id'], 'data': data, 'mandrill_result': esult})
 
     if form.redirect_url:
-        redirect_url = urlparse.urljoin(referer, form.redirect_url)
+        redirect_url = urlparse.urljoin(referer, form.redirect_url[0])
         return redirect(redirect_url)
     else:
         return 'Sent'
