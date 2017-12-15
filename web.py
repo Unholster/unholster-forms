@@ -27,7 +27,7 @@ def submit():
     except KeyError:
         abort(403)
 
-    attachments = [file for name, file in request.files.iteritems()]
+    attachments = [file for name, file in request.files.iteritems() if file]
 
     # account = accounts.find_one({"name": account_name})
 
