@@ -3,7 +3,7 @@ Jinja2==2.7
 MarkupSafe==0.17
 Werkzeug==0.15.3
 gunicorn==19.5.0
-pymongo==2.5.1
+pymongo==2.5.2
 requests==2.20.0
 wsgiref==0.1.2
 raven[flask]==6.1.0
